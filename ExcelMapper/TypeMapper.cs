@@ -2,9 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Ganss.Excel
 {
@@ -97,16 +95,19 @@ namespace Ganss.Excel
             {
                 return (c, o) =>
                 {
-                    if (o == null)
-                        c.SetCellValue((string)null);
-                    else
+
+                    if (o != null && DateTime.TryParse(o.ToString(), out DateTime d))
                     {
-                        var d = (DateTime)o;
                         c.SetCellValue(d);
 
                         if (BuiltinFormat != 0 || CustomFormat != null || c.CellStyle.DataFormat == 0)
                             SetCellFormat(c, 0x16); // "m/d/yy h:mm"
                     }
+                    else
+                    {
+                        c.SetCellValue((string)null);
+                    }
+
                 };
             }
             else if (PropertyType == typeof(bool))
@@ -167,7 +168,7 @@ namespace Ganss.Excel
         /// <param name="val">The value.</param>
         public void SetProperty(object o, object val)
         {
-            var v = IsNullable && (val == null || (val as string) == "") ? null : Convert.ChangeType(val, PropertyType, CultureInfo.InvariantCulture);
+            var v = IsNullable && (val == null || (val as string) == "" || (val as string) == "NULL") ? null : Convert.ChangeType(val, PropertyType, CultureInfo.InvariantCulture);
             Property.SetValue(o, v, null);
         }
 

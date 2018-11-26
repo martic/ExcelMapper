@@ -3,7 +3,6 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Ganss.Excel.Tests
 {
@@ -282,6 +281,35 @@ namespace Ganss.Excel.Tests
 
             CollectionAssert.AreEqual(products, productsFetched);
         }
+        [Test]
+        public void NullableNULLstringTest()
+        {
+            var workbook = WorkbookFactory.Create(@"..\..\..\productsNULL.xlsx");
+            var excel = new ExcelMapper(workbook);
+            var products = excel.Fetch<NullableProduct>().ToList();
+
+            var nudossi = products[0];
+            Assert.AreEqual("Nudossi", nudossi.Name);
+            Assert.AreEqual(60, nudossi.Number);
+            Assert.AreEqual(1.99m, nudossi.Price);
+            Assert.IsFalse(nudossi.Offer.Value);
+            nudossi.OfferEnd = null;
+
+            var halloren = products[1];
+            Assert.IsTrue(halloren.Offer.Value);
+            Assert.AreEqual(null, halloren.OfferEnd);
+            halloren.Number = null;
+            halloren.Offer = null;
+
+            var file = "productsnullableNULLstring.xlsx";
+
+            new ExcelMapper().Save(file, products, "Products");
+
+            var productsFetched = new ExcelMapper(file).Fetch<NullableProduct>().ToList();
+
+            CollectionAssert.AreEqual(products, productsFetched);
+        }
+
 
         public class DataFormatProduct
         {
@@ -305,5 +333,6 @@ namespace Ganss.Excel.Tests
             Assert.AreEqual(p.Date, pf.Date);
             Assert.AreEqual(p.Number, pf.Number);
         }
+
     }
 }
